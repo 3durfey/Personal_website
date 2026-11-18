@@ -1,25 +1,19 @@
-const featuredProjects = [
-  {
-    title: "Property Management System",
-    summary:
-      "Designed and implemented a full-stack property management platform for tenants, property owners, and administrators with role-based workflows for leases, payments, and maintenance requests.",
-    tags: ["Node.js", "Express", "MySQL"],
-  },
-  {
-    title: "In-Network Temperature Aggregation over CTP",
-    summary:
-      "Built a TinyOS application to compute average temperature in-network over CTP, reducing transmissions by up to 95% while maintaining strong packet reception in TOSSIM simulations.",
-    tags: ["nesC", "TinyOS", "TOSSIM"],
-  },
-  {
-    title: "Insta to Mastodon Reposter",
-    summary:
-      "Created a Node.js automation tool that scrapes Instagram content, filters posts from the previous day, and reposts them to Mastodon on a daily schedule through the API.",
-    tags: ["Node.js", "Masto.js", "cron"],
-  },
-];
+import { useEffect, useState } from "react";
 
 export default function App() {
+  const [featuredProjects, setFeaturedProjects] = useState([]);
+  const [projectsError, setProjectsError] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((response) => {
+        if (!response.ok) throw new Error("Could not load projects");
+        return response.json();
+      })
+      .then(setFeaturedProjects)
+      .catch(() => setProjectsError(true));
+  }, []);
+
   return (
     <div className="page-shell">
       <div className="background-orb orb-one" />
@@ -117,7 +111,11 @@ export default function App() {
               </p>
             </div>
 
-            <div className="project-grid">
+            {projectsError ? (
+              <p className="section-copy" role="status">Projects are temporarily unavailable. Please try again later.</p>
+            ) : featuredProjects.length === 0 ? (
+              <p className="section-copy" role="status">Loading projects…</p>
+            ) : <div className="project-grid">
               {featuredProjects.map((project) => (
                 <article className="project-card" key={project.title}>
                   <div className="project-shine" aria-hidden="true" />
@@ -130,7 +128,7 @@ export default function App() {
                   </div>
                 </article>
               ))}
-            </div>
+            </div>}
           </section>
         </section>
       </main>
